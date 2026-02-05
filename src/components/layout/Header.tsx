@@ -23,7 +23,8 @@ export function Header() {
         <img
           src={LOGO_URL}
           alt="Logo Hospital Municipal São José"
-          className="h-10 w-10 rounded-md object-cover"
+          className="h-10 rounded-md object-contain"
+          style={{ aspectRatio: '632/172' }}
         />
         
         <div className="flex flex-col">
