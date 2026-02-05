@@ -1,353 +1,37 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
-
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-
-import {
-  useEstatisticaStore,
-  estatisticaSchema,
-  type EstatisticaFormData,
-  setores,
-} from "@/hooks/useEstatisticaStore";
-import { parseEstatisticaInput } from "@/lib/estatisticaParser";
-
-const numericFields = [
-  { name: "pacientes00h", label: "Pacientes 00h" },
-  { name: "internacoes", label: "Internações" },
-  { name: "transfDe", label: "Transf. De" },
-  { name: "altas", label: "Altas" },
-  { name: "transfPara", label: "Transf. Para" },
-  { name: "obitos", label: "Óbitos" },
-  { name: "obitosMais24h", label: "Óbitos > 24h" },
-  { name: "obitosMenos24h", label: "Óbitos < 24h" },
-  { name: "pacienteDia", label: "Paciente Dia" },
-  { name: "leitosAtivos", label: "Leitos Ativos" },
-  { name: "leitosExtras", label: "Leitos Extras" },
-  { name: "leitosReforma", label: "Leitos Reforma" },
-  { name: "leitosInterditados", label: "Leitos Interditados" },
-  { name: "leitosDia", label: "Leitos Dia" },
-] as const;
+import { BatchImportDialog } from "@/components/settings/BatchImportDialog";
+import { IndicadorFormDialog } from "@/components/settings/IndicadorFormDialog";
+import { IndicadorManagerDialog } from "@/components/settings/IndicadorManagerDialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Configuracoes() {
-  const { addRecord, addBatchRecords, records, removeRecord } = useEstatisticaStore();
-  const [batchInput, setBatchInput] = useState("");
-
-  const form = useForm<EstatisticaFormData>({
-    resolver: zodResolver(estatisticaSchema),
-    defaultValues: {
-      data: new Date().toISOString().split("T")[0],
-      pacientes00h: 0,
-      internacoes: 0,
-      transfDe: 0,
-      altas: 0,
-      transfPara: 0,
-      obitos: 0,
-      obitosMais24h: 0,
-      obitosMenos24h: 0,
-      pacienteDia: 0,
-      leitosAtivos: 0,
-      leitosExtras: 0,
-      leitosReforma: 0,
-      leitosInterditados: 0,
-      leitosDia: 0,
-    },
-  });
-
-  const onSubmit = (data: EstatisticaFormData) => {
-    addRecord(data);
-    toast.success("Dados salvos com sucesso!");
-    form.reset({
-      ...data,
-      setor: undefined,
-      pacientes00h: 0,
-      internacoes: 0,
-      transfDe: 0,
-      altas: 0,
-      transfPara: 0,
-      obitos: 0,
-      obitosMais24h: 0,
-      obitosMenos24h: 0,
-      pacienteDia: 0,
-      leitosAtivos: 0,
-      leitosExtras: 0,
-      leitosReforma: 0,
-      leitosInterditados: 0,
-      leitosDia: 0,
-    });
-  };
-
-  const handleBatchImport = () => {
-    if (!batchInput.trim()) {
-      toast.error("Cole os dados da planilha antes de processar.");
-      return;
-    }
-
-    const result = parseEstatisticaInput(batchInput);
-
-    if (result.success) {
-      addBatchRecords(result.data);
-      toast.success(`${result.data.length} linhas importadas com sucesso!`);
-      setBatchInput("");
-    } else {
-      toast.error(`Erro na importação: ${result.errors.length} erros encontrados.`);
-      // Optionally show the errors in a more detailed way
-      console.error(result.errors);
-      result.errors.slice(0, 3).forEach(err => toast.error(err));
-      if (result.errors.length > 3) {
-         toast.error(`E mais ${result.errors.length - 3} erros...`);
-      }
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    removeRecord(id);
-    toast.success("Registro removido.");
-  };
-
   return (
     <LayoutWrapper>
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Configurações</h2>
           <p className="text-muted-foreground">
-            Gerenciamento de dados estatísticos
+            Gerenciamento do sistema e indicadores
           </p>
         </div>
 
-        {/* Batch Import Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Carga de Dados em Lote</CardTitle>
+            <CardTitle>Ações Rápidas</CardTitle>
             <CardDescription>
-              Cole os dados da planilha para importação em massa.
-              <br />
-              Ordem: Data, Setor, 00:00, Intern., Transf DE, Altas, Transf PARA, Obitos, Óbitos +24Hs, Obitos -24Hs, Paciente/Dia, Leitos Ativos, Leitos Extras, Leitos Reforma, Leitos Interd., Leitos-dia.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-               <Label>Colar dados da Planilha</Label>
-               <Textarea
-                 placeholder="Cole aqui as linhas copiadas do Excel..."
-                 className="min-h-[150px] font-mono text-sm"
-                 value={batchInput}
-                 onChange={(e) => setBatchInput(e.target.value)}
-               />
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={handleBatchImport}>
-                Processar e Salvar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Entrada de Dados - Estatística</CardTitle>
-            <CardDescription>
-              Preencha os dados estatísticos diários por setor.
+              Acesse as principais funcionalidades de configuração e cadastro.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="data"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* 1. Importar Dados em Lote */}
+              <BatchImportDialog />
 
-                  <FormField
-                    control={form.control}
-                    name="setor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Setor</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um setor" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {setores.map((setor) => (
-                              <SelectItem key={setor} value={setor}>
-                                {setor}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              {/* 2. Gerenciar Indicadores */}
+              <IndicadorManagerDialog />
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {numericFields.map((fieldItem) => (
-                    <FormField
-                      key={fieldItem.name}
-                      control={form.control}
-                      name={fieldItem.name}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">
-                            {fieldItem.label}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              {...field}
-                              onChange={(e) => field.onChange(e)} // Let zod coerce handle it or number input
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex justify-end">
-                  <Button type="submit" size="lg">
-                    Salvar Dados
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Controle de Dados Locais</CardTitle>
-            <CardDescription>
-              Visualize e gerencie os registros salvos localmente.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Setor</TableHead>
-                      <TableHead>00:00</TableHead>
-                      <TableHead>Intern.</TableHead>
-                      <TableHead>Transf DE</TableHead>
-                      <TableHead>Altas</TableHead>
-                      <TableHead>Transf PARA</TableHead>
-                      <TableHead>Obitos</TableHead>
-                      <TableHead>Óbitos +24h</TableHead>
-                      <TableHead>Óbitos -24h</TableHead>
-                      <TableHead>Pac./Dia</TableHead>
-                      <TableHead>Leitos Ativ.</TableHead>
-                      <TableHead>L. Extras</TableHead>
-                      <TableHead>L. Reforma</TableHead>
-                      <TableHead>L. Interd.</TableHead>
-                      <TableHead>Leitos-dia</TableHead>
-                      <TableHead className="font-bold">Total Saídas</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {records.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={18} className="text-center h-24">
-                          Nenhum registro encontrado.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      records.map((record) => (
-                        <TableRow key={record.id}>
-                          <TableCell>{new Date(record.data + 'T00:00:00').toLocaleDateString('pt-BR')}</TableCell>
-                          <TableCell>{record.setor}</TableCell>
-                          <TableCell>{record.pacientes00h}</TableCell>
-                          <TableCell>{record.internacoes}</TableCell>
-                          <TableCell>{record.transfDe}</TableCell>
-                          <TableCell>{record.altas}</TableCell>
-                          <TableCell>{record.transfPara}</TableCell>
-                          <TableCell>{record.obitos}</TableCell>
-                          <TableCell>{record.obitosMais24h}</TableCell>
-                          <TableCell>{record.obitosMenos24h}</TableCell>
-                          <TableCell>{record.pacienteDia}</TableCell>
-                          <TableCell>{record.leitosAtivos}</TableCell>
-                          <TableCell>{record.leitosExtras}</TableCell>
-                          <TableCell>{record.leitosReforma}</TableCell>
-                          <TableCell>{record.leitosInterditados}</TableCell>
-                          <TableCell>{record.leitosDia}</TableCell>
-                          <TableCell className="font-bold text-blue-600">{record.saidas}</TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(record.id)}
-                              className="text-destructive hover:text-destructive/90"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              {/* 3. Novo Indicador */}
+              <IndicadorFormDialog />
             </div>
           </CardContent>
         </Card>
