@@ -1,5 +1,4 @@
 import { parse, isValid, format } from 'date-fns';
-import { setores } from './constants';
 import { EstatisticaRecord } from '@/types';
 
 interface ParseResult {
@@ -19,9 +18,6 @@ export function parseEstatisticaInput(input: string): ParseResult {
     const columns = line.split('\t');
 
     // If split by tab results in 1 item, try splitting by multiple spaces
-    // but be careful not to split sector names like "CC - PRE OPERATORIO"
-    // So \t is safer. The user prompt says "dividir por tabulação (\t) ou espaços múltiplos".
-    // I will try tab first. If len < 16, try multiple spaces (2 or more).
     let cols = columns;
     if (cols.length < 16) {
        cols = line.split(/\s{2,}/);
@@ -52,29 +48,29 @@ export function parseEstatisticaInput(input: string): ParseResult {
     }
     dateStr = format(parsedDate, 'yyyy-MM-dd'); // ISO format for storage/input type=date
 
-    // Validate Setor
-    // Normalize string? The prompt says "exact match".
-    // "Garantir que o nome do setor colado corresponda exatamente à lista oficial"
-    if (!setores.includes(rawSetor as any)) {
-      errors.push(`Linha ${index + 1}: Setor inválido '${rawSetor}'.`);
-      return;
-    }
+    // Validate Setor - REMOVED STRICT VALIDATION
+    // As per requirement: "Se um setor novo for detectado... o sistema deve aceitar"
 
     // Parse Numbers
     const parseNum = (val: string, fieldName: string): number => {
+      // Handle hyphen as zero
+      if (val === '-') return 0;
+
       // Remove thousands separators if any (dots) and replace decimal comma with dot
-      // Assuming Brazilian format: 1.000,00 -> 1000.00
-      // But these are counts, likely integers.
       let cleanVal = val.replace(/\./g, '').replace(',', '.');
-      const num = Number(cleanVal);
+
+      let num = Number(cleanVal);
       if (isNaN(num)) {
+         // Attempt to check if it was just a hyphen mixed with something else? No, strict numeric check but loose on format.
          errors.push(`Linha ${index + 1}: Valor inválido para '${fieldName}': '${val}'`);
          return -1;
       }
+
+      // Handle negative numbers: treat as 0
       if (num < 0) {
-        errors.push(`Linha ${index + 1}: Valor negativo para '${fieldName}': '${val}'`);
-        return -1;
+        num = 0;
       }
+
       return num;
     };
 

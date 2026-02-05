@@ -39,6 +39,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import {
   useEstatisticaStore,
@@ -127,9 +128,8 @@ export default function Configuracoes() {
       setBatchInput("");
     } else {
       toast.error(`Erro na importação: ${result.errors.length} erros encontrados.`);
-      // Optionally show the errors in a more detailed way, maybe console or a dialog
+      // Optionally show the errors in a more detailed way
       console.error(result.errors);
-      // Show up to 3 errors in toast
       result.errors.slice(0, 3).forEach(err => toast.error(err));
       if (result.errors.length > 3) {
          toast.error(`E mais ${result.errors.length - 3} erros...`);
@@ -280,43 +280,74 @@ export default function Configuracoes() {
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Setor</TableHead>
-                    <TableHead>Saídas (Calc)</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {records.length === 0 ? (
+              <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center h-24">
-                        Nenhum registro encontrado.
-                      </TableCell>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Setor</TableHead>
+                      <TableHead>00:00</TableHead>
+                      <TableHead>Intern.</TableHead>
+                      <TableHead>Transf DE</TableHead>
+                      <TableHead>Altas</TableHead>
+                      <TableHead>Transf PARA</TableHead>
+                      <TableHead>Obitos</TableHead>
+                      <TableHead>Óbitos +24h</TableHead>
+                      <TableHead>Óbitos -24h</TableHead>
+                      <TableHead>Pac./Dia</TableHead>
+                      <TableHead>Leitos Ativ.</TableHead>
+                      <TableHead>L. Extras</TableHead>
+                      <TableHead>L. Reforma</TableHead>
+                      <TableHead>L. Interd.</TableHead>
+                      <TableHead>Leitos-dia</TableHead>
+                      <TableHead className="font-bold">Total Saídas</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
-                  ) : (
-                    records.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell>{new Date(record.data + 'T00:00:00').toLocaleDateString('pt-BR')}</TableCell>
-                        <TableCell>{record.setor}</TableCell>
-                        <TableCell>{record.saidas}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(record.id)}
-                            className="text-destructive hover:text-destructive/90"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                  </TableHeader>
+                  <TableBody>
+                    {records.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={18} className="text-center h-24">
+                          Nenhum registro encontrado.
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      records.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell>{new Date(record.data + 'T00:00:00').toLocaleDateString('pt-BR')}</TableCell>
+                          <TableCell>{record.setor}</TableCell>
+                          <TableCell>{record.pacientes00h}</TableCell>
+                          <TableCell>{record.internacoes}</TableCell>
+                          <TableCell>{record.transfDe}</TableCell>
+                          <TableCell>{record.altas}</TableCell>
+                          <TableCell>{record.transfPara}</TableCell>
+                          <TableCell>{record.obitos}</TableCell>
+                          <TableCell>{record.obitosMais24h}</TableCell>
+                          <TableCell>{record.obitosMenos24h}</TableCell>
+                          <TableCell>{record.pacienteDia}</TableCell>
+                          <TableCell>{record.leitosAtivos}</TableCell>
+                          <TableCell>{record.leitosExtras}</TableCell>
+                          <TableCell>{record.leitosReforma}</TableCell>
+                          <TableCell>{record.leitosInterditados}</TableCell>
+                          <TableCell>{record.leitosDia}</TableCell>
+                          <TableCell className="font-bold text-blue-600">{record.saidas}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(record.id)}
+                              className="text-destructive hover:text-destructive/90"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </div>
           </CardContent>
         </Card>
