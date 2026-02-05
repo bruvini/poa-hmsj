@@ -1,7 +1,7 @@
-import { Filter, DollarSign, TrendingUp, Activity, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { LayoutWrapper } from '@/components/layout/LayoutWrapper';
-import { DashboardCard } from '@/components/DashboardCard';
-import { EmptyState } from '@/components/EmptyState';
+import { GlobalFilters } from '@/components/GlobalFilters';
+import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   return (
@@ -15,88 +15,70 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Filtros Globais */}
-        <DashboardCard
-          title="Filtros Globais"
-          description="Selecione os parâmetros para filtrar os dados"
-          icon={Filter}
-        >
-          <EmptyState
-            icon={Filter}
-            title="Filtros não configurados"
-            description="Os filtros globais estarão disponíveis após a configuração inicial."
-          />
-        </DashboardCard>
+        {/* Filtros Globais - Faixa Horizontal */}
+        <GlobalFilters />
 
-        {/* Grid de Indicadores */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Indicadores Financeiros */}
-          <DashboardCard
-            title="Receitas"
-            description="Acompanhamento de receitas"
-            icon={DollarSign}
-            className="md:col-span-1"
-          >
-            <EmptyState
-              icon={DollarSign}
-              title="Dados de receitas"
-              description="Informações financeiras serão exibidas aqui."
-            />
-          </DashboardCard>
-
-          <DashboardCard
-            title="Despesas"
-            description="Controle de despesas"
-            icon={TrendingUp}
-            className="md:col-span-1"
-          >
-            <EmptyState
-              icon={TrendingUp}
-              title="Dados de despesas"
-              description="Informações de gastos serão exibidas aqui."
-            />
-          </DashboardCard>
-
-          <DashboardCard
-            title="Balanço Financeiro"
-            description="Resultado consolidado"
-            icon={BarChart3}
-            className="md:col-span-1"
-          >
-            <EmptyState
-              icon={BarChart3}
-              title="Balanço geral"
-              description="O balanço financeiro será exibido aqui."
-            />
-          </DashboardCard>
-        </div>
+        {/* Indicadores Financeiros */}
+        <section className="space-y-3">
+          <h2 className="text-2xl font-bold" style={{ color: 'hsl(205 90% 20%)' }}>
+            Indicadores Financeiros
+          </h2>
+          <div className={cn(
+            'rounded-lg border border-border/50 bg-card p-8 shadow-sm',
+            'flex items-center justify-center min-h-[200px]'
+          )}>
+            <p className="text-center text-muted-foreground">
+              Espaço destinado ao desenvolvimento dos indicadores financeiros.
+            </p>
+          </div>
+        </section>
 
         {/* Indicadores Qualitativos */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <DashboardCard
-            title="Indicadores de Qualidade"
-            description="Métricas de atendimento"
-            icon={Activity}
-          >
-            <EmptyState
-              icon={Activity}
-              title="Indicadores qualitativos"
-              description="Métricas de qualidade serão exibidas aqui."
-            />
-          </DashboardCard>
+        <section className="space-y-4">
+          <h2 className="text-2xl font-bold" style={{ color: 'hsl(205 90% 20%)' }}>
+            Indicadores Qualitativos
+          </h2>
 
-          <DashboardCard
-            title="Metas do POA"
-            description="Acompanhamento de metas"
-            icon={BarChart3}
-          >
-            <EmptyState
-              icon={BarChart3}
-              title="Progresso das metas"
-              description="O progresso das metas será exibido aqui."
-            />
-          </DashboardCard>
-        </div>
+          {/* Linha 1: Filtros Locais */}
+          <div className={cn(
+            'rounded-lg border border-border/50 bg-card p-4 shadow-sm',
+            'flex items-center justify-center min-h-[60px]'
+          )}>
+            <p className="text-sm text-muted-foreground">
+              Filtros específicos deste bloco
+            </p>
+          </div>
+
+          {/* Linha 2: Scorecards Grid (4 colunas) */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border border-border/50 bg-card p-4 shadow-sm">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Pontuação Obtida</p>
+              <p className="text-2xl font-bold text-foreground">—</p>
+            </div>
+            <div className="rounded-lg border border-border/50 bg-card p-4 shadow-sm">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Pontuação Máxima</p>
+              <p className="text-2xl font-bold text-foreground">—</p>
+            </div>
+            <div className="rounded-lg border border-border/50 bg-card p-4 shadow-sm">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Progresso (%)</p>
+              <p className="text-2xl font-bold text-foreground">—</p>
+            </div>
+            <div className="rounded-lg border border-border/50 bg-card p-4 shadow-sm">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Dias Restantes</p>
+              <p className="text-2xl font-bold text-foreground">—</p>
+            </div>
+          </div>
+
+          {/* Linha 3: Matriz Detalhada */}
+          <div className={cn(
+            'rounded-lg border border-border/50 bg-card p-8 shadow-sm',
+            'flex items-center justify-center min-h-[250px]'
+          )}>
+            <p className="text-center text-muted-foreground">
+              Espaço destinado à Matriz Detalhada das Metas Qualitativas.
+            </p>
+          </div>
+        </section>
       </div>
     </LayoutWrapper>
   );
