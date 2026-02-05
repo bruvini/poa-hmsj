@@ -1,27 +1,11 @@
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
+import { setores } from '@/lib/constants';
+import { EstatisticaRecord } from '@/types';
 
-export const setores = [
-  "CC - PRE OPERATORIO",
-  "CC - RECUPERAÇÃO",
-  "CC - SALAS CIRURGICAS",
-  "CCA PRE - OPERATORIO",
-  "PS DECISÃO CIRURGICA",
-  "PS DECISÃO CLINICA",
-  "SALA DE EMERGENCIA",
-  "SALA EMERGENCIA TRAUM",
-  "UCP",
-  "UNID. AVC AGUDO",
-  "UNID. CIRURGICA",
-  "UNID. CLINICA MEDICA",
-  "UNID. DE AIT",
-  "UNID. DE AVC - INTEGRAL",
-  "UNID. INT. GERAL - UIG",
-  "UNID. JS ORTOPEDIA",
-  "UNID. NEFROLOGIA TRANSPLANTE",
-  "UNID. ONCOLOGIA",
-  "UTI"
-] as const;
+// Re-export specific types/constants if needed by consumers, or they can import directly.
+// The UI uses 'setores' and 'estatisticaSchema' and 'EstatisticaFormData'.
+export { setores };
 
 export const estatisticaSchema = z.object({
   data: z.string().min(1, "Data é obrigatória"),
@@ -45,11 +29,6 @@ export const estatisticaSchema = z.object({
 });
 
 export type EstatisticaFormData = z.infer<typeof estatisticaSchema>;
-
-export interface EstatisticaRecord extends EstatisticaFormData {
-  id: string;
-  saidas: number;
-}
 
 const STORAGE_KEY = 'estatistica-local-storage';
 
@@ -84,6 +63,11 @@ export function useEstatisticaStore() {
     return newRecord;
   };
 
+  const addBatchRecords = (newRecords: EstatisticaRecord[]) => {
+    const updatedRecords = [...records, ...newRecords];
+    saveToStorage(updatedRecords);
+  };
+
   const removeRecord = (id: string) => {
     const updatedRecords = records.filter((record) => record.id !== id);
     saveToStorage(updatedRecords);
@@ -92,6 +76,7 @@ export function useEstatisticaStore() {
   return {
     records,
     addRecord,
+    addBatchRecords,
     removeRecord,
   };
 }

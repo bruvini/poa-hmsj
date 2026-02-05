@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
@@ -12,7 +13,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -43,6 +46,7 @@ import {
   type EstatisticaFormData,
   setores,
 } from "@/hooks/useEstatisticaStore";
+import { parseEstatisticaInput } from "@/lib/estatisticaParser";
 
 const numericFields = [
   { name: "pacientes00h", label: "Pacientes 00h" },
@@ -62,7 +66,8 @@ const numericFields = [
 ] as const;
 
 export default function Configuracoes() {
-  const { addRecord, records, removeRecord } = useEstatisticaStore();
+  const { addRecord, addBatchRecords, records, removeRecord } = useEstatisticaStore();
+  const [batchInput, setBatchInput] = useState("");
 
   const form = useForm<EstatisticaFormData>({
     resolver: zodResolver(estatisticaSchema),
@@ -89,7 +94,7 @@ export default function Configuracoes() {
     addRecord(data);
     toast.success("Dados salvos com sucesso!");
     form.reset({
-      ...data, // Keep date and maybe sector? No, clear mostly.
+      ...data,
       setor: undefined,
       pacientes00h: 0,
       internacoes: 0,
@@ -108,6 +113,30 @@ export default function Configuracoes() {
     });
   };
 
+  const handleBatchImport = () => {
+    if (!batchInput.trim()) {
+      toast.error("Cole os dados da planilha antes de processar.");
+      return;
+    }
+
+    const result = parseEstatisticaInput(batchInput);
+
+    if (result.success) {
+      addBatchRecords(result.data);
+      toast.success(`${result.data.length} linhas importadas com sucesso!`);
+      setBatchInput("");
+    } else {
+      toast.error(`Erro na importação: ${result.errors.length} erros encontrados.`);
+      // Optionally show the errors in a more detailed way, maybe console or a dialog
+      console.error(result.errors);
+      // Show up to 3 errors in toast
+      result.errors.slice(0, 3).forEach(err => toast.error(err));
+      if (result.errors.length > 3) {
+         toast.error(`E mais ${result.errors.length - 3} erros...`);
+      }
+    }
+  };
+
   const handleDelete = (id: string) => {
     removeRecord(id);
     toast.success("Registro removido.");
@@ -122,6 +151,34 @@ export default function Configuracoes() {
             Gerenciamento de dados estatísticos
           </p>
         </div>
+
+        {/* Batch Import Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Carga de Dados em Lote</CardTitle>
+            <CardDescription>
+              Cole os dados da planilha para importação em massa.
+              <br />
+              Ordem: Data, Setor, 00:00, Intern., Transf DE, Altas, Transf PARA, Obitos, Óbitos +24Hs, Obitos -24Hs, Paciente/Dia, Leitos Ativos, Leitos Extras, Leitos Reforma, Leitos Interd., Leitos-dia.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+               <Label>Colar dados da Planilha</Label>
+               <Textarea
+                 placeholder="Cole aqui as linhas copiadas do Excel..."
+                 className="min-h-[150px] font-mono text-sm"
+                 value={batchInput}
+                 onChange={(e) => setBatchInput(e.target.value)}
+               />
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={handleBatchImport}>
+                Processar e Salvar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
